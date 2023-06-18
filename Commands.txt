@@ -1,0 +1,40 @@
+first of all, you should run docker desktop 
+
+then, open powershell in the path of the docker compose file 
+
+third, run docker compose command 
+
+1) docker-compose -f dockerCompose.yml up -d
+to create kafka container
+
+2) docker exec -it kafka /opt/kafka_2.12-2.3.0/bin/kafka-topics.sh --create --bootstrap-server kafka:9092 --replication-factor 1 --partitions 1 --topic offersTopic
+to create the topic of the producer and consumer in the kafka container
+
+3) docker exec -it kafka /opt/kafka_2.12-2.3.0/bin/kafka-topics.sh --list --bootstrap-server kafka:9092
+to check that the topic is created
+it should print -> offersTopic
+
+4) docker container run --name ecommerceDb --network=ecommerce-net -e MYSQL_ROOT_PASSWORD=12345 -e MYSQL_DATABASE=offersDb -d -p 3306:3306 mysql:5.7
+to create database container
+
+open another powershell in the path of the docker file of producer
+5) docker image build -t producerimage .
+to create the image of the producer
+
+6) docker container run --network ecommerce-net --name marketer -d -p 8080:8080 producerimage
+then, run this command to create producer application
+
+open another powershell in the path of the docker file of consumer
+7) docker image build -t consumerimage .
+to create the image of the consumer
+
+8) docker container run --network ecommerce-net --name customer -d -p 8081:8081 consumerimage
+then, run this command to create consumer application
+
+Retrieve data from DB container using SELECT
+9) docker container exec -it ecommerceDb bash
+mysql -uroot -p12345
+show databases;
+use offersDb;
+show tables;
+select * from offer;
